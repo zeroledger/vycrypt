@@ -1,0 +1,15 @@
+name: Setup
+description: Install and cache npm and node_modules to reuse them in workflows and jobs
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@v4
+      with:
+        cache: "npm"
+        node-version: 18.12.x
+        registry-url: https://npm.pkg.github.com
+        scope: "@dgma"
+        always-auth: "true"
+    - run: npm ci
+      shell: bash

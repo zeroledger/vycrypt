@@ -1,0 +1,9 @@
+{
+  "extends": "@paulmillr/jsbt/tsconfig.cjs.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "skipLibCheck": true
+  },
+  "include": ["src", "test", "perf"],
+  "exclude": ["node_modules"]
+}

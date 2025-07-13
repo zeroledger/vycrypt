@@ -1,0 +1,26 @@
+name: Quality gate
+on:
+  push:
+    branches-ignore:
+      - v*
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+      - run: npm run typecheck;
+      - run: npm run lint
+  test:
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+      - name: Run unit tests
+        run: npm run test
