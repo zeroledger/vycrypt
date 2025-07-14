@@ -1,27 +1,14 @@
 import { isHex } from "viem";
 import { privateKeyToAccount, generatePrivateKey } from "viem/accounts";
-
 import { encrypt, decrypt } from "../src/crypt";
+import * as fs from "fs";
 
 describe("crypt", () => {
   const privKey = generatePrivateKey();
   const account = privateKeyToAccount(privKey);
 
   const hexData = `0xa5eaba8f6b292d059d9e8c3a2f1b16af`;
-  const jsonData = JSON.stringify({
-    data: {
-      channelId:
-        "0x9774d860afce7a5a58f0e9a7f23a705f434742352ec6f5dfa491b240494fa5bc",
-      sync: {
-        snap: '{"token":"0x25eC837C325C3f6c7D7772CD737CBca962329621","user0":"0xfdbF10719dDb9310768160d4a5a03EC5F848FD50","user1":"0xf2BbBe4Cb4070a40600c126a5c2f082369E300cB","domain":{"name":"Flankk","version":"0.0.5","chainId":11155420,"verifyingContract":"0x13D9589164E5De30c61588082279Cf93a5c5Dd23"},"user0SignedState":"0xa502cdd4defe8bcaeee6bc29aeae121ce86ff98a4362de473b021c347104caec34801ed00849d62a385900e5910409725d7549a61c5ae5439f6f56708121717a1c","user1SignedState":"0x35fd11f2686205565c36e392d63d362f48fd9de19f9d0e49be8d30423569c3a663ab9a211febdc767dc35c56cd6e9d6369dc18fd2dc55d756852e130cb48e6d31b","UTXOs":[{"id":"0x7ff86fb03e1c7e1a1e00ae7ea49e7387f9ccf2a099ac074eb96d331814ad85fe","from":{"user0Balance":"0x0","user1Balance":"0x2"},"to":{"user0Balance":"0x2","user1Balance":"0x0"},"conditionParams":{"params":{"deadline":"0x67a0d300","stealthUser":"0xe7CC95646D942CCb57D8aC531DFf97CaC221b45f"},"meta":{"multiplier":"0x9d46b26ddfbbf2aa36bbfd7e0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000c0000000000000000000000000000000000000000000000000000000000000002102f9931d38f86643de2517aa5793be1d33c4f98995fa3c5d6133fd03e29e34c89200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003224721381dd8ef7209463b14628cb96402e4af44118eb745adffb4f76ad38dfd637aaca753348b3822f7deabcbc7d003343740000000000000000000000000000"},"abi":[{"name":"SSTLCParams","type":"tuple","components":[{"name":"stealthUser","type":"address"},{"name":"deadline","type":"uint256"}]}],"type":"SSTLC"},"condition":"0x743DDD0f1A2425b05C20C48e593ffa42C99A5532"},{"id":"0x9822d8b78732c929517a5366583aad6fe2e4d42ef217a753c72bdad1f8ac120b","from":{"user0Balance":"0x0","user1Balance":"0x2"},"to":{"user0Balance":"0x2","user1Balance":"0x0"},"conditionParams":{"params":{"deadline":"0xcf1d7952","stealthUser":"0xafBf23b2785fe66fFda7ce289cC13F8C05CB0093"},"meta":{"multiplier":"0x76ce82e4439148567862712b0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000c00000000000000000000000000000000000000000000000000000000000000021032ae72292c294c97680f575859f3d2ae23ecaf76efded78c8308459cb8bb8b7f2000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000032b757fc9180311a554cf911bbe465771b9c55e2ebf092e5f48fc4b68d607b319420aa508e1dd656a9e1c241b696bd1f5843b10000000000000000000000000000"},"abi":[{"name":"SSTLCParams","type":"tuple","components":[{"name":"stealthUser","type":"address"},{"name":"deadline","type":"uint256"}]}],"type":"SSTLC"},"condition":"0x743DDD0f1A2425b05C20C48e593ffa42C99A5532"},{"id":"0x1a4692222d166a162e75068aa52e863716705230091b9ca5f31f7ad1fd5bfe4c","from":{"user0Balance":"0x0","user1Balance":"0x0"},"to":{"user0Balance":"0x2a53","user1Balance":"0x23c9"},"conditionParams":"0x0","condition":"0x0000000000000000000000000000000000000000"}],"nonce":"0x2d3","url":"http://proxy_0:3000"}',
-        url: "http://proxy_1:3000",
-      },
-      transactions: [],
-      nonce: "0x2d8",
-      signedUpdateChannelTypeHash:
-        "0xc741c4069ca24b757faedf544c25e311b45d81ef45377358bab5436bdb6a804567ea2ba74193c417399a2f41e729639bc44ddd041226b17b19a68c6eccef81ff1b",
-    },
-  });
+  const jsonData = fs.readFileSync("./test/mocks/arbitraryData.json", "utf8");
 
   describe("encrypt", () => {
     it("should encrypt hex string", () => {
@@ -30,6 +17,50 @@ describe("crypt", () => {
 
     it("should encrypt json string", () => {
       expect(isHex(encrypt(jsonData, account.publicKey))).toBeTruthy();
+    });
+
+    it("should encrypt empty string", () => {
+      const encrypted = encrypt("", account.publicKey);
+      expect(isHex(encrypted)).toBeTruthy();
+      expect(decrypt(privKey, encrypted)).toBe("");
+    });
+
+    it("should encrypt large data", () => {
+      const largeData = "x".repeat(10000);
+      const encrypted = encrypt(largeData, account.publicKey);
+      expect(isHex(encrypted)).toBeTruthy();
+      expect(decrypt(privKey, encrypted)).toBe(largeData);
+    });
+
+    it("should encrypt unicode data", () => {
+      const unicodeData = "Hello 世界 🌍 emoji 🚀";
+      const encrypted = encrypt(unicodeData, account.publicKey);
+      expect(isHex(encrypted)).toBeTruthy();
+      expect(decrypt(privKey, encrypted)).toBe(unicodeData);
+    });
+
+    it("should encrypt binary-like data", () => {
+      const binaryData = "\x00\x01\x02\x03\xff\xfe\xfd";
+      const encrypted = encrypt(binaryData, account.publicKey);
+      expect(isHex(encrypted)).toBeTruthy();
+      expect(decrypt(privKey, encrypted)).toBe(binaryData);
+    });
+
+    it("should produce different ciphertexts for same plaintext", () => {
+      const data = "test data";
+      const encrypted1 = encrypt(data, account.publicKey);
+      const encrypted2 = encrypt(data, account.publicKey);
+      expect(encrypted1).not.toBe(encrypted2);
+    });
+
+    it("should throw error for invalid public key", () => {
+      expect(() => encrypt("test", "0xinvalid" as `0x${string}`)).toThrow();
+    });
+
+    it("should throw error for non-hex public key", () => {
+      expect(() =>
+        encrypt("test", "not-a-hex-string" as `0x${string}`),
+      ).toThrow();
     });
   });
 
@@ -42,6 +73,128 @@ describe("crypt", () => {
     it("should decrypt json string", () => {
       const encryptedData = encrypt(jsonData, account.publicKey);
       expect(decrypt(privKey, encryptedData)).toBe(jsonData);
+    });
+
+    it("should decrypt empty string", () => {
+      const encryptedData = encrypt("", account.publicKey);
+      expect(decrypt(privKey, encryptedData)).toBe("");
+    });
+
+    it("should decrypt large data", () => {
+      const largeData = "x".repeat(10000);
+      const encryptedData = encrypt(largeData, account.publicKey);
+      expect(decrypt(privKey, encryptedData)).toBe(largeData);
+    });
+
+    it("should decrypt unicode data", () => {
+      const unicodeData = "Hello 世界 🌍 emoji 🚀";
+      const encryptedData = encrypt(unicodeData, account.publicKey);
+      expect(decrypt(privKey, encryptedData)).toBe(unicodeData);
+    });
+
+    it("should throw error for invalid private key", () => {
+      const encryptedData = encrypt("test", account.publicKey);
+      expect(() =>
+        decrypt("0xinvalid" as `0x${string}`, encryptedData),
+      ).toThrow();
+    });
+
+    it("should throw error for non-hex private key", () => {
+      const encryptedData = encrypt("test", account.publicKey);
+      expect(() =>
+        decrypt("not-a-hex-string" as `0x${string}`, encryptedData),
+      ).toThrow();
+    });
+
+    it("should throw error for invalid encrypted data", () => {
+      expect(() => decrypt(privKey, "0xinvalid" as `0x${string}`)).toThrow();
+    });
+
+    it("should throw error for malformed encrypted data", () => {
+      expect(() =>
+        decrypt(privKey, "0x1234567890abcdef" as `0x${string}`),
+      ).toThrow();
+    });
+
+    it("should throw error for wrong private key", () => {
+      const wrongPrivKey = generatePrivateKey();
+      const encryptedData = encrypt("test", account.publicKey);
+      expect(() => decrypt(wrongPrivKey, encryptedData)).toThrow();
+    });
+  });
+
+  describe("round-trip encryption", () => {
+    it("should work with different key pairs", () => {
+      const privKey1 = generatePrivateKey();
+      const account1 = privateKeyToAccount(privKey1);
+
+      const data = "secret message";
+      const encrypted = encrypt(data, account1.publicKey);
+      const decrypted = decrypt(privKey1, encrypted);
+      expect(decrypted).toBe(data);
+    });
+
+    it("should work with multiple encryptions", () => {
+      const data = "test data";
+      const encrypted1 = encrypt(data, account.publicKey);
+      const encrypted2 = encrypt(data, account.publicKey);
+      const encrypted3 = encrypt(data, account.publicKey);
+
+      expect(decrypt(privKey, encrypted1)).toBe(data);
+      expect(decrypt(privKey, encrypted2)).toBe(data);
+      expect(decrypt(privKey, encrypted3)).toBe(data);
+    });
+  });
+
+  describe("edge cases", () => {
+    it("should handle very long strings", () => {
+      const longString = "a".repeat(100000);
+      const encrypted = encrypt(longString, account.publicKey);
+      expect(decrypt(privKey, encrypted)).toBe(longString);
+    });
+
+    it("should handle null bytes in data", () => {
+      const dataWithNulls = "test\x00data\x00with\x00nulls";
+      const encrypted = encrypt(dataWithNulls, account.publicKey);
+      expect(decrypt(privKey, encrypted)).toBe(dataWithNulls);
+    });
+
+    it("should handle special characters", () => {
+      const specialChars = "!@#$%^&*()_+-=[]{}|;':\",./<>?`~";
+      const encrypted = encrypt(specialChars, account.publicKey);
+      expect(decrypt(privKey, encrypted)).toBe(specialChars);
+    });
+
+    it("should handle newlines and tabs", () => {
+      const dataWithNewlines = "line1\nline2\tline3\r\nline4";
+      const encrypted = encrypt(dataWithNewlines, account.publicKey);
+      expect(decrypt(privKey, encrypted)).toBe(dataWithNewlines);
+    });
+  });
+
+  describe("security properties", () => {
+    it("should not be deterministic", () => {
+      const data = "same data";
+      const encrypted1 = encrypt(data, account.publicKey);
+      const encrypted2 = encrypt(data, account.publicKey);
+      const encrypted3 = encrypt(data, account.publicKey);
+
+      expect(encrypted1).not.toBe(encrypted2);
+      expect(encrypted2).not.toBe(encrypted3);
+      expect(encrypted1).not.toBe(encrypted3);
+    });
+
+    it("should produce different ciphertexts for different public keys", () => {
+      const privKey1 = generatePrivateKey();
+      const account1 = privateKeyToAccount(privKey1);
+      const privKey2 = generatePrivateKey();
+      const account2 = privateKeyToAccount(privKey2);
+
+      const data = "test data";
+      const encrypted1 = encrypt(data, account1.publicKey);
+      const encrypted2 = encrypt(data, account2.publicKey);
+
+      expect(encrypted1).not.toBe(encrypted2);
     });
   });
 });
