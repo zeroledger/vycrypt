@@ -2,7 +2,7 @@ import { createStealth, deriveStealthAccount } from "../../src/stealth";
 import { isAddress, toHex } from "viem";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 
-describe("EllipticService", () => {
+describe("Stealth lib", () => {
   const privateKey = generatePrivateKey();
   const pubKey = privateKeyToAccount(privateKey).publicKey;
 

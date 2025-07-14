@@ -1,7 +1,7 @@
 import { secp256k1 } from "@noble/curves/secp256k1";
 import { type Hex, toHex } from "viem";
 
-const { ProjectivePoint, CURVE } = secp256k1;
+const { Point, CURVE } = secp256k1;
 
 /**
  * @notice Returns new PublicKey prefixed with 0x04
@@ -14,9 +14,7 @@ export const mulPublicKey = (
   isCompressed = false,
 ) => {
   // Perform the multiplication
-  const publicKey_ = ProjectivePoint.fromHex(publicKey.slice(2)).multiply(
-    number,
-  );
+  const publicKey_ = Point.fromHex(publicKey.slice(2)).multiply(number);
 
   return `0x${publicKey_.toHex(isCompressed)}` as Hex;
 };

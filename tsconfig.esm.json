@@ -1,8 +1,7 @@
 {
-  "extends": "@paulmillr/jsbt/tsconfig.esm.json",
+  "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "esm",
-    "skipLibCheck": true,
     "module": "esnext",
     "moduleResolution": "bundler"
   },

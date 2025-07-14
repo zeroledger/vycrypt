@@ -2,7 +2,7 @@ import { mulPublicKey, mulPrivateKey } from "../../src/stealth";
 import { hexToBigInt, keccak256, type Hex } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 
-describe("EllipticService", () => {
+describe("Elliptic lib", () => {
   const random = hexToBigInt("0x6e3c9fd251ab29e975e08263de3bd80878756834");
   const privateKey =
     "0x03931c2e8f4d8cb2c285e5d0684eab0dd5c3d8f2d15b3377721b272fedaff245";

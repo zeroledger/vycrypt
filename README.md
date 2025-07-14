@@ -1,12 +1,13 @@
-# Flankk-SDK
+# Vycryp
 
-TS Development Kit for Flankk Protocol
+TS Development Kit for ZeroLeger Protocol
+
+*Warning*: Software provided as is and did not passed any security checks and reviews. Please do not use it in production.
 
 ## Features
 
-- Channel management
-- Stealth Addresses & SSTLC
-- ECDH Encryption with Ephemeral PK
+- Stealth Addresses creation using secp256k1 pubKey and random
+- ECDH Encryption via ephemeral pk
 
 ## Installation
 
@@ -14,11 +15,11 @@ TS Development Kit for Flankk Protocol
 
 ```text
 //npm.pkg.github.com/:_authToken=_VALUE_
-@dgma:registry=https://npm.pkg.github.com
+@zeroledger:registry=https://npm.pkg.github.com
 always-auth=true
 ```
 
-2. run `npm install @dgma/flankk-sdk.git`
+2. run `npm install @zeroledger/vycrypt.git`
 
 ## Usage
 
@@ -68,43 +69,6 @@ const data = `0xa5eaba8f6b292d059d9e8c3a2f1b16af`;
 
 const encryptedData = encrypt(data, account.publicKey);
 decrypt(privKey, encryptedData); // === data
-```
-
-### Channels
-
-```ts
-export const flankk = "0x1E0fFf8037C7E6c2Da4fD65DFD749751b5f48f0c";
-export const token = "0xb42660F4582133bB92f70f36B5B4A66C2Ee122F2";
-
-const domain = {
-  name: "Flankk",
-  version: "0.0.5",
-  chainId: arbitrumSepolia.id,
-  verifyingContract: flankk,
-} as const;
-
-const client0 = createWalletClient({
-  account: privateKeyToAccount(generatePrivateKey()),
-  chain: arbitrumSepolia,
-  transport: http(),
-}).extend(publicActions);
-
-const client1 = createWalletClient({
-  account: privateKeyToAccount(generatePrivateKey()),
-  chain: arbitrumSepolia,
-  transport: http(),
-}).extend(publicActions);
-
-const channel = new Channel(
-  token,
-  domain,
-  // user0 (operator) address
-  client0.account.address,
-  // user1 (counterparty) address
-  client1.account.address,
-  // operator client instance
-  client0,
-);
 ```
 
 ## Contributing

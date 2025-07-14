@@ -1,9 +1,26 @@
 {
-  "extends": "@paulmillr/jsbt/tsconfig.cjs.json",
   "compilerOptions": {
+    "target": "es2020",
+    "lib": [
+      "es2020"
+    ],
+    "strict": true,
+    "sourceMap": true,
+    "declaration": true,
+    "declarationMap": true,
+    "allowSyntheticDefaultImports": false,
+    "allowUnreachableCode": false,
+    "esModuleInterop": false,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
+    "noUncheckedIndexedAccess": false,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "module": "commonjs",
+    "moduleResolution": "node10",
     "outDir": "./dist",
     "skipLibCheck": true
   },
-  "include": ["src", "test", "perf"],
+  "include": ["src", "test", "perf", "jest.config.ts"],
   "exclude": ["node_modules"]
 }
