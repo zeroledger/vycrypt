@@ -25,6 +25,31 @@ TypeScript Development Kit for ZeroLedger Protocol - A comprehensive cryptograph
 npm install @zeroledger/vycrypt
 ```
 
+## Module Formats
+
+This library supports both **CommonJS** and **ES Modules** formats for maximum compatibility:
+
+- **CommonJS**: For Node.js environments and bundlers that prefer CommonJS
+- **ES Modules**: For modern bundlers and environments that support ES modules
+
+The library automatically provides the appropriate format based on your import method:
+
+```typescript
+// ES Modules (recommended for modern projects)
+import { encrypt, decrypt } from "@zeroledger/vycrypt";
+
+// CommonJS (for legacy Node.js or specific bundler requirements)
+const { encrypt, decrypt } = require("@zeroledger/vycrypt");
+```
+
+### Build Output
+
+The library builds to two directories:
+- `cjs/` - CommonJS format with `.js` files
+- `esm/` - ES Modules format with `.js` files and `package.json`
+
+Both formats include TypeScript declaration files (`.d.ts`) for full type support.
+
 ## API Reference
 
 ### Encryption & Decryption
@@ -245,6 +270,25 @@ git clone <repository>
 cd vycrypt
 npm install
 npm test
+```
+
+### Building
+
+To build both CommonJS and ES Module versions:
+
+```bash
+npm run build
+```
+
+This creates:
+- `cjs/` directory with CommonJS files
+- `esm/` directory with ES Module files
+- TypeScript declaration files (`.d.ts`) for both formats
+
+### Type Checking
+
+```bash
+npm run typecheck
 ```
 
 ## License
