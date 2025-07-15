@@ -8,8 +8,8 @@ runs:
       with:
         cache: "npm"
         node-version: 18.12.x
-        registry-url: https://npm.pkg.github.com
-        scope: "@dgma"
-        always-auth: "true"
+        registry-url: "https://registry.npmjs.org"
+        scope: '@zeroledger'
+        always-auth: 'true'
     - run: npm ci
       shell: bash
