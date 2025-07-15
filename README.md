@@ -1,5 +1,9 @@
 # Vycrypt
 
+[![Quality gate](https://github.com/zeroledger/vycrypt/actions/workflows/quality-gate.yml/badge.svg)](https://github.com/zeroledger/vycrypt/actions/workflows/quality-gate.yml)
+
+
+
 TypeScript Development Kit for ZeroLedger Protocol - A comprehensive cryptographic library for stealth addresses and ECDH encryption.
 
 *Warning*: Software provided as is and has not passed any security checks and reviews.

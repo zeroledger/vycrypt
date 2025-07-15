@@ -11,6 +11,9 @@
     "require": "./cjs/index.js",
     "import": "./esm/index.js"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "main": "cjs/index.js",
   "keywords": [
     "vyrcypt",
