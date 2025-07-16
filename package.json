@@ -1,6 +1,6 @@
 {
-  "name": "@zeroledger/vyrcypt",
-  "version": "0.0.1",
+  "name": "@zeroledger/vycrypt",
+  "version": "0.0.1-alpha",
   "description": "TS Development Kit for ZeroLeger Protocol",
   "files": [
     "esm",
@@ -16,7 +16,7 @@
   },
   "main": "cjs/index.js",
   "keywords": [
-    "vyrcypt",
+    "vycrypt",
     "web3",
     "sdk",
     "zeroledger",
