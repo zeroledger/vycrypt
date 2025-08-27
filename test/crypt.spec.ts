@@ -12,6 +12,8 @@ describe("crypt", () => {
 
   describe("encrypt", () => {
     it("should encrypt hex string", () => {
+      const data = encrypt(hexData, account.publicKey);
+      console.log("data ", data);
       expect(isHex(encrypt(hexData, account.publicKey))).toBeTruthy();
     });
 

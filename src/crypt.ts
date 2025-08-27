@@ -10,20 +10,13 @@ import {
   sha256,
   toHex,
   toBytes,
-  parseAbiParameters,
-  encodeAbiParameters,
-  decodeAbiParameters,
 } from "viem";
 
 const {
-  ProjectivePoint,
+  Point,
   utils: secp256k1Utils,
   getSharedSecret: nobleGetSharedSecret,
 } = secp256k1;
-
-export const CRYPT_ABI = parseAbiParameters(
-  "bytes12 iv, bytes ephemeralPublicKey, bytes encodedData",
-);
 
 const decoder = new TextDecoder();
 const encoder = new TextEncoder();
@@ -51,7 +44,7 @@ export function assertValidPoint(point: Hex) {
   if (!isHex(point))
     throw new Error("Must provide uncompressed public key as hex string");
 
-  const pointInstance = ProjectivePoint.fromHex(point.slice(2));
+  const pointInstance = Point.fromHex(point.slice(2));
   pointInstance.assertValidity();
 }
 
@@ -75,8 +68,7 @@ function getSharedSecret(privateKey: Hash, publicKey: Hex) {
 export const encrypt = (data: string, counterpartyPubKey: Hex) => {
   // Get shared secret to use as encryption key
   const ephemeralPrivateKey = secp256k1Utils.randomPrivateKey();
-  const ephemeralPublicKey =
-    ProjectivePoint.fromPrivateKey(ephemeralPrivateKey);
+  const ephemeralPublicKey = Point.fromPrivateKey(ephemeralPrivateKey);
   const ephemeralPrivateKeyHex = toHex(ephemeralPrivateKey);
   const ephemeralPublicKeyHex = `0x${ephemeralPublicKey.toHex()}` as Hex;
   const sharedSecret = getSharedSecret(
@@ -88,23 +80,16 @@ export const encrypt = (data: string, counterpartyPubKey: Hex) => {
   const rawData = encoder.encode(data);
   const aes = gcm(sharedSecret, iv);
   const ciphertext = aes.encrypt(rawData);
-  return encodeAbiParameters(CRYPT_ABI, [
-    toHex(iv),
-    ephemeralPublicKeyHex,
-    toHex(ciphertext),
-  ]);
+  return `${toHex(iv)}${ephemeralPublicKeyHex.slice(2)}${toHex(ciphertext).slice(2)}` as Hex;
 };
 
 export const decrypt = (privateKey: Hash, encodedData: Hex) => {
-  const [iv_, ephemeralPublicKey, ciphertext_] = decodeAbiParameters(
-    CRYPT_ABI,
-    encodedData,
-  );
+  // manually split string by bytes12, bytes64, the rest
+  const iv = toBytes(encodedData.slice(0, 26));
+  const ephemeralPublicKey = `0x${encodedData.slice(26, 92)}` as Hex;
+  const ciphertext = toBytes(`0x${encodedData.slice(92)}`);
   assertValidPrivateKey(privateKey);
   assertValidPoint(ephemeralPublicKey);
-
-  const iv = toBytes(iv_);
-  const ciphertext = toBytes(ciphertext_);
 
   // Get shared secret to use as decryption key, then decrypt with XOR
   const sharedSecret = getSharedSecret(privateKey, ephemeralPublicKey);
