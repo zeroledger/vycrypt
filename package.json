@@ -34,8 +34,7 @@
     "lint": "eslint src/**/*.ts test/**/*.ts",
     "prepare": "husky",
     "typecheck": "tsc --noEmit",
-    "build": "tsc",
-    "build:clean": "rm *.{js,js.map,d.ts,d.ts.map} stealth 2> /dev/null",
+    "build": "rm -rf *.js *.d.ts *.d.ts.map *.js.map stealth && tsc -p tsconfig.build.json",
     "prepublishOnly": "npm run build"
   },
   "exports": {

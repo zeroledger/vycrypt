@@ -5,9 +5,9 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "strict": true,
-    "sourceMap": true,
-    "declaration": true,
-    "declarationMap": true,
+    "sourceMap": false,
+    "declaration": false,
+    "declarationMap": false,
     "allowSyntheticDefaultImports": true,
     "allowUnreachableCode": false,
     "esModuleInterop": false,
@@ -16,13 +16,13 @@
     "noUncheckedIndexedAccess": false,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "outDir": "./",
+    "noEmit": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
     "allowImportingTsExtensions": false,
     "verbatimModuleSyntax": false
   },
-  "include": ["src"],
-  "exclude": ["node_modules", "dist", "cjs", "esm", "test", "jest.config.ts"]
+  "include": ["src", "test", "jest.config.ts"],
+  "exclude": ["node_modules", "dist", "cjs", "esm"]
 }
