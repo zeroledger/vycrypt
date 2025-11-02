@@ -1,6 +1,6 @@
 {
   "name": "@zeroledger/vycrypt",
-  "version": "1.0.0-betta",
+  "version": "1.0.0-alpha",
   "description": "Crypto primitives for ZeroLedger Protocol",
   "files": [
     "*.js",
