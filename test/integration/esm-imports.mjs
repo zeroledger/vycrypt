@@ -6,6 +6,7 @@
  */
 
 import { encrypt, decrypt } from "../../crypt.js";
+import { generateQuantumKeyPair, encryptQuantum, decryptQuantum } from "../../qcrypt.js";
 import { createStealth, deriveStealthAccount } from "../../stealth/index.js";
 import { mulPublicKey, mulPrivateKey } from "../../stealth/index.js";
 
@@ -15,6 +16,9 @@ console.log("✅ All imports successful from built files");
 const checks = [
   { name: "encrypt", value: encrypt },
   { name: "decrypt", value: decrypt },
+  { name: "generateQuantumKeyPair", value: generateQuantumKeyPair },
+  { name: "encryptQuantum", value: encryptQuantum },
+  { name: "decryptQuantum", value: decryptQuantum },
   { name: "createStealth", value: createStealth },
   { name: "deriveStealthAccount", value: deriveStealthAccount },
   { name: "mulPublicKey", value: mulPublicKey },

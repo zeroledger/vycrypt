@@ -43,7 +43,8 @@
   "exports": {
     ".": "./index.js",
     "./crypt.js": "./crypt.js",
-    "./stealth.js": "./stealth/index.js"
+    "./qcrypt.js": "./qcrypt.js",
+    "./stealth/index.js": "./stealth/index.js"
   },
   "engines": {
     "node": ">= 20.19.0"
