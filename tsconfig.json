@@ -1,14 +1,14 @@
 {
   "compilerOptions": {
-    "target": "es2020",
-    "lib": [
-      "es2020"
-    ],
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
     "strict": true,
     "sourceMap": true,
     "declaration": true,
     "declarationMap": true,
-    "allowSyntheticDefaultImports": false,
+    "allowSyntheticDefaultImports": true,
     "allowUnreachableCode": false,
     "esModuleInterop": false,
     "noFallthroughCasesInSwitch": true,
@@ -16,11 +16,13 @@
     "noUncheckedIndexedAccess": false,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "module": "commonjs",
-    "moduleResolution": "node10",
-    "outDir": "./dist",
-    "skipLibCheck": true
+    "outDir": "./",
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "allowImportingTsExtensions": false,
+    "verbatimModuleSyntax": false
   },
-  "include": ["src", "test", "perf", "jest.config.ts"],
-  "exclude": ["node_modules"]
+  "include": ["src"],
+  "exclude": ["node_modules", "dist", "cjs", "esm", "test", "jest.config.ts"]
 }

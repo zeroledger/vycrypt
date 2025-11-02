@@ -4,7 +4,7 @@
 
 
 
-TypeScript Development Kit for ZeroLedger Protocol - A comprehensive cryptographic library for stealth addresses and ECDH encryption.
+TypeScript Development Kit for ZeroLedger Protocol - A comprehensive cryptographic library for stealth addresses and ECDH encryption. Pure ESM, optimized for modern JavaScript environments.
 
 *Warning*: Software provided as is and has not passed any security checks and reviews.
 
@@ -29,30 +29,25 @@ TypeScript Development Kit for ZeroLedger Protocol - A comprehensive cryptograph
 npm install @zeroledger/vycrypt
 ```
 
-## Module Formats
+## Module Format
 
-This library supports both **CommonJS** and **ES Modules** formats for maximum compatibility:
+This library is **pure ESM** (ES Modules) and requires **Node.js 20.19.0 or later**.
 
-- **CommonJS**: For Node.js environments and bundlers that prefer CommonJS
-- **ES Modules**: For modern bundlers and environments that support ES modules
-
-The library automatically provides the appropriate format based on your import method:
+**Import the library:**
 
 ```typescript
-// ES Modules (recommended for modern projects)
 import { encrypt, decrypt } from "@zeroledger/vycrypt";
-
-// CommonJS (for legacy Node.js or specific bundler requirements)
-const { encrypt, decrypt } = require("@zeroledger/vycrypt");
+import { createStealth, deriveStealthAccount } from "@zeroledger/vycrypt";
 ```
 
 ### Build Output
 
-The library builds to two directories:
-- `cjs/` - CommonJS format with `.js` files
-- `esm/` - ES Modules format with `.js` files and `package.json`
+The library builds directly to the root directory with ESM format:
+- `*.js` - ES Module JavaScript files
+- `*.d.ts` - TypeScript declaration files
+- `stealth/` - Stealth address modules
 
-Both formats include TypeScript declaration files (`.d.ts`) for full type support.
+All files include source maps (`.js.map`, `.d.ts.map`) for debugging.
 
 ## API Reference
 
@@ -252,10 +247,12 @@ npm test
 
 ## Dependencies
 
-- **@noble/curves**: For secp256k1 elliptic curve operations
-- **@noble/ciphers**: For AES-256-GCM encryption
-- **@noble/hashes**: For SHA-256 hashing
-- **viem**: For Ethereum-compatible utilities and types
+- **@noble/curves** (v1.9.1): For secp256k1 elliptic curve operations
+- **@noble/ciphers** (v2.0.1): For AES-256-GCM encryption
+- **@noble/hashes**: For SHA-256 and SHA-512 hashing
+- **viem** (v2.38.6): For Ethereum-compatible utilities and types
+
+All dependencies are ESM-compatible and actively maintained.
 
 ## Contributing
 
@@ -278,16 +275,16 @@ npm test
 
 ### Building
 
-To build both CommonJS and ES Module versions:
+To build the ESM output:
 
 ```bash
 npm run build
 ```
 
 This creates:
-- `cjs/` directory with CommonJS files
-- `esm/` directory with ES Module files
-- TypeScript declaration files (`.d.ts`) for both formats
+- `*.js` files in the root directory (ESM format)
+- `stealth/` directory with stealth modules
+- TypeScript declaration files (`.d.ts`) and source maps
 
 ### Type Checking
 
