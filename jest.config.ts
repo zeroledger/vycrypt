@@ -5,12 +5,16 @@ const config: Config = {
   extensionsToTreatAsEsm: [".ts"],
   verbose: true,
   moduleFileExtensions: ["js", "json", "ts"],
-  testRegex: ".*\\.spec\\.ts$",
+  testMatch: ["**/test/**/*.spec.ts", "!**/test/build-output.spec.ts"],
   transform: {
     "^.+\\.ts$": [
       "ts-jest",
       {
         useESM: true,
+        tsconfig: {
+          module: "ES2022",
+          target: "ES2022",
+        },
       },
     ],
   },

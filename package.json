@@ -31,11 +31,12 @@
   },
   "scripts": {
     "test": "NODE_OPTIONS='--experimental-vm-modules --no-warnings' jest",
-    "test:build": "npm run build && npm test -- test/build-output.spec.ts && node test/integration/esm-imports.mjs",
+    "test:build": "npm run build && NODE_OPTIONS='--experimental-vm-modules --no-warnings' jest --testMatch='**/test/build-output.spec.ts' && node test/integration/esm-imports.mjs",
     "lint": "eslint src/**/*.ts test/**/*.ts",
     "prepare": "husky",
     "typecheck": "tsc --noEmit",
     "build": "rm -rf *.js *.d.ts *.d.ts.map *.js.map stealth && tsc -p tsconfig.build.json",
+    "build:clean": "rm -rf *.js *.d.ts *.d.ts.map *.js.map stealth",
     "prepublishOnly": "npm run build"
   },
   "exports": {
