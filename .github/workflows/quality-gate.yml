@@ -24,3 +24,12 @@ jobs:
       - uses: ./.github/actions/setup
       - name: Run unit tests
         run: npm run test
+
+  test-build:
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+      - name: Run build tests
+        run: npm run test:build

@@ -1,14 +1,18 @@
 {
   "compilerOptions": {
-    "target": "es2020",
+    "target": "es2022",
     "lib": [
-      "es2020"
+      "es2022",
+      "dom"
     ],
+    "module": "Node20",
+    "moduleResolution": "Node16",
     "strict": true,
-    "sourceMap": true,
-    "declaration": true,
-    "declarationMap": true,
-    "allowSyntheticDefaultImports": false,
+    "sourceMap": false,
+    "declaration": false,
+    "declarationMap": false,
+    "isolatedDeclarations": false,
+    "allowSyntheticDefaultImports": true,
     "allowUnreachableCode": false,
     "esModuleInterop": false,
     "noFallthroughCasesInSwitch": true,
@@ -16,11 +20,11 @@
     "noUncheckedIndexedAccess": false,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "module": "commonjs",
-    "moduleResolution": "node10",
-    "outDir": "./dist",
-    "skipLibCheck": true
+    "erasableSyntaxOnly": true,
+    "verbatimModuleSyntax": true,
+    "allowImportingTsExtensions": true,
+    "rewriteRelativeImportExtensions": true
   },
-  "include": ["src", "test", "perf", "jest.config.ts"],
-  "exclude": ["node_modules"]
+  "include": ["src", "test", "jest.config.ts"],
+  "exclude": ["node_modules", "dist", "cjs", "esm"]
 }

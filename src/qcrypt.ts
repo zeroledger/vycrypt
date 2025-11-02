@@ -1,5 +1,5 @@
 import { randomBytes } from "@noble/hashes/utils";
-import { gcm } from "@noble/ciphers/aes";
+import { gcm } from "@noble/ciphers/aes.js";
 import { ml_kem768 } from "@noble/post-quantum/ml-kem.js";
 import { sha512 } from "@noble/hashes/sha2";
 

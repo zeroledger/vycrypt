@@ -4,7 +4,7 @@ import {
   decryptQuantum,
   generateQuantumKeyPair,
   type QuantumKeyPair,
-} from "../src/qcrypt";
+} from "../src/qcrypt.ts";
 import * as fs from "fs";
 
 describe("quantum-resistant encryption", () => {

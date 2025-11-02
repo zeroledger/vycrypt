@@ -1,2 +1,2 @@
-export * from "./elliptic";
-export * from "./stealth";
+export * from "./elliptic.ts";
+export * from "./stealth.ts";
