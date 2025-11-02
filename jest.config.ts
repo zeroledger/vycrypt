@@ -1,26 +1,29 @@
 import type { Config } from "jest";
 
 const config: Config = {
+  preset: "ts-jest/presets/default-esm",
+  extensionsToTreatAsEsm: [".ts"],
   verbose: true,
   moduleFileExtensions: ["js", "json", "ts"],
-  testRegex: ".*\\.spec\\.ts$",
+  testMatch: ["**/test/**/*.spec.ts", "!**/test/build-output.spec.ts"],
   transform: {
-    "^.+\\.(t|j)s$": "@swc/jest",
+    "^.+\\.ts$": [
+      "ts-jest",
+      {
+        useESM: true,
+        tsconfig: {
+          module: "ES2022",
+          target: "ES2022",
+        },
+      },
+    ],
   },
-  collectCoverageFrom: ["<rootDir>/src/**/*.ts", "!<rootDir>/**/*.module.ts"],
-  coveragePathIgnorePatterns: [
-    "/node_modules/",
-    "<rootDir>/src/(.+)/dto/(.+)",
-    "<rootDir>/src/(.+)/(.+).module.ts",
-    "<rootDir>/src/(.+).module.ts",
-    "<rootDir>/src/main.ts",
-    "<rootDir>/src/run.ts",
-    "<rootDir>/src/config/",
-    "<rootDir>/src/common/db/migrations/",
-  ],
+  moduleNameMapper: {
+    "^(\\.{1,2}/.*)\\.js$": "$1",
+  },
+  collectCoverageFrom: ["<rootDir>/src/**/*.ts"],
   coverageDirectory: "<rootDir>/coverage",
   testEnvironment: "node",
-  modulePaths: ["<rootDir>", "<rootDir>/src"],
 };
 
 export default config;

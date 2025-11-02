@@ -1,6 +1,6 @@
 import { isHex } from "viem";
 import { privateKeyToAccount, generatePrivateKey } from "viem/accounts";
-import { encrypt, decrypt } from "../src/crypt";
+import { encrypt, decrypt } from "../src/crypt.ts";
 import * as fs from "fs";
 
 describe("crypt", () => {

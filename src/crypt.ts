@@ -1,6 +1,6 @@
 import { secp256k1 } from "@noble/curves/secp256k1";
 import { randomBytes } from "@noble/hashes/utils";
-import { gcm } from "@noble/ciphers/aes";
+import { gcm } from "@noble/ciphers/aes.js";
 
 import {
   isHash,
@@ -13,7 +13,7 @@ import {
 } from "viem";
 
 const {
-  Point,
+  ProjectivePoint: Point,
   utils: secp256k1Utils,
   getSharedSecret: nobleGetSharedSecret,
 } = secp256k1;

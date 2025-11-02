@@ -2,9 +2,7 @@
 
 [![Quality gate](https://github.com/zeroledger/vycrypt/actions/workflows/quality-gate.yml/badge.svg)](https://github.com/zeroledger/vycrypt/actions/workflows/quality-gate.yml)
 
-
-
-TypeScript Development Kit for ZeroLedger Protocol - A comprehensive cryptographic library for stealth addresses and ECDH encryption.
+Crypto primitives for ZeroLedger Protocol - A comprehensive cryptographic library for stealth addresses and ECDH encryption. Pure ESM, optimized for modern JavaScript environments.
 
 *Warning*: Software provided as is and has not passed any security checks and reviews.
 
@@ -29,30 +27,25 @@ TypeScript Development Kit for ZeroLedger Protocol - A comprehensive cryptograph
 npm install @zeroledger/vycrypt
 ```
 
-## Module Formats
+## Module Format
 
-This library supports both **CommonJS** and **ES Modules** formats for maximum compatibility:
+This library is **pure ESM** (ES Modules) and requires **Node.js 20.19.0 or later**.
 
-- **CommonJS**: For Node.js environments and bundlers that prefer CommonJS
-- **ES Modules**: For modern bundlers and environments that support ES modules
-
-The library automatically provides the appropriate format based on your import method:
+**Import the library:**
 
 ```typescript
-// ES Modules (recommended for modern projects)
-import { encrypt, decrypt } from "@zeroledger/vycrypt";
-
-// CommonJS (for legacy Node.js or specific bundler requirements)
-const { encrypt, decrypt } = require("@zeroledger/vycrypt");
+import { encrypt, decrypt } from "@zeroledger/vycrypt/crypt.js";
+import { createStealth, deriveStealthAccount } from "@zeroledger/vycrypt/stealth.js";
 ```
 
 ### Build Output
 
-The library builds to two directories:
-- `cjs/` - CommonJS format with `.js` files
-- `esm/` - ES Modules format with `.js` files and `package.json`
+The library builds directly to the root directory with ESM format:
+- `*.js` - ES Module JavaScript files
+- `*.d.ts` - TypeScript declaration files
+- `stealth/` - Stealth address modules
 
-Both formats include TypeScript declaration files (`.d.ts`) for full type support.
+All files include source maps (`.js.map`, `.d.ts.map`) for debugging.
 
 ## API Reference
 
@@ -119,7 +112,7 @@ Multiplies a private key by a scalar value.
 ### Basic Encryption/Decryption
 
 ```typescript
-import { encrypt, decrypt } from "@zeroledger/vycrypt";
+import { encrypt, decrypt } from "@zeroledger/vycrypt/crypt.js";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 
 // Generate key pair
@@ -138,7 +131,7 @@ console.log(decryptedData); // "Hello, World!"
 ### Stealth Address Creation
 
 ```typescript
-import { createStealth, deriveStealthAccount } from "@zeroledger/vycrypt";
+import { createStealth, deriveStealthAccount } from "@zeroledger/vycrypt/stealth.js";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 import { toHex } from "viem";
 
@@ -158,7 +151,7 @@ console.log("Derived Address:", account.address); // Same as stealthAddress
 ### Elliptic Curve Operations
 
 ```typescript
-import { mulPublicKey, mulPrivateKey } from "@zeroledger/vycrypt";
+import { mulPublicKey, mulPrivateKey } from "@zeroledger/vycrypt/stealth.js";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 
 const privateKey = generatePrivateKey();
@@ -179,7 +172,7 @@ console.log(newAccount.publicKey === newPublicKey); // true
 ### Advanced: Encrypting Large Data
 
 ```typescript
-import { encrypt, decrypt } from "@zeroledger/vycrypt";
+import { encrypt, decrypt } from "@zeroledger/vycrypt/crypt.js";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 
 const privKey = generatePrivateKey();
@@ -250,12 +243,25 @@ Run tests with:
 npm test
 ```
 
+Validate build output and ESM imports:
+```bash
+npm run test:build
+```
+
+This command:
+1. Builds the library
+2. Validates all expected files are created
+3. Verifies built modules can be imported as ESM
+4. Confirms the API works as documented
+
 ## Dependencies
 
-- **@noble/curves**: For secp256k1 elliptic curve operations
-- **@noble/ciphers**: For AES-256-GCM encryption
-- **@noble/hashes**: For SHA-256 hashing
-- **viem**: For Ethereum-compatible utilities and types
+- **@noble/ciphers** (v2.0.1): AES-256-GCM authenticated encryption
+- **viem** (v2.38.6): Ethereum-compatible utilities, types, and hashing (SHA-256)
+
+**Note:** Viem internally uses and re-exports `@noble/curves` (secp256k1) and `@noble/hashes`, ensuring compatibility across the ecosystem.
+
+All dependencies are ESM-compatible and actively maintained.
 
 ## Contributing
 
@@ -278,16 +284,16 @@ npm test
 
 ### Building
 
-To build both CommonJS and ES Module versions:
+To build the ESM output:
 
 ```bash
 npm run build
 ```
 
 This creates:
-- `cjs/` directory with CommonJS files
-- `esm/` directory with ES Module files
-- TypeScript declaration files (`.d.ts`) for both formats
+- `*.js` files in the root directory (ESM format)
+- `stealth/` directory with stealth modules
+- TypeScript declaration files (`.d.ts`) and source maps
 
 ### Type Checking
 

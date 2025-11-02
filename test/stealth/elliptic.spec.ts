@@ -1,4 +1,4 @@
-import { mulPublicKey, mulPrivateKey } from "../../src/stealth";
+import { mulPublicKey, mulPrivateKey } from "../../src/stealth/elliptic.ts";
 import { hexToBigInt, keccak256, type Hex } from "viem";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 

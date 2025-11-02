@@ -1,7 +1,7 @@
 import { secp256k1 } from "@noble/curves/secp256k1";
 import { type Hex, toHex } from "viem";
 
-const { Point, CURVE } = secp256k1;
+const { ProjectivePoint: Point, CURVE } = secp256k1;
 
 /**
  * @notice Returns new PublicKey prefixed with 0x04
