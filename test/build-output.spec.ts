@@ -20,6 +20,10 @@ describe("Build Output Validation", () => {
     "crypt.d.ts",
     "crypt.js.map",
     "crypt.d.ts.map",
+    "qcrypt.js",
+    "qcrypt.d.ts",
+    "qcrypt.js.map",
+    "qcrypt.d.ts.map",
     "stealth/index.js",
     "stealth/index.d.ts",
     "stealth/index.js.map",
@@ -109,7 +113,8 @@ describe("Build Output Validation", () => {
       expect(pkg.exports).toBeDefined();
       expect(pkg.exports["."]).toBe("./index.js");
       expect(pkg.exports["./crypt.js"]).toBe("./crypt.js");
-      expect(pkg.exports["./stealth.js"]).toBe("./stealth/index.js");
+      expect(pkg.exports["./qcrypt.js"]).toBe("./qcrypt.js");
+      expect(pkg.exports["./stealth/index.js"]).toBe("./stealth/index.js");
     });
 
     it("main entry point should be index.js", () => {

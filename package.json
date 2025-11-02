@@ -27,6 +27,7 @@
   },
   "dependencies": {
     "@noble/ciphers": "^2.0.1",
+    "@noble/post-quantum": "^0.5.2",
     "viem": "^2.38.6"
   },
   "scripts": {
@@ -42,7 +43,8 @@
   "exports": {
     ".": "./index.js",
     "./crypt.js": "./crypt.js",
-    "./stealth.js": "./stealth/index.js"
+    "./qcrypt.js": "./qcrypt.js",
+    "./stealth/index.js": "./stealth/index.js"
   },
   "engines": {
     "node": ">= 20.19.0"

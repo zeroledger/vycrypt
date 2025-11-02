@@ -2,24 +2,22 @@
 
 [![Quality gate](https://github.com/zeroledger/vycrypt/actions/workflows/quality-gate.yml/badge.svg)](https://github.com/zeroledger/vycrypt/actions/workflows/quality-gate.yml)
 
-Crypto primitives for ZeroLedger Protocol - A comprehensive cryptographic library for stealth addresses and ECDH encryption. Pure ESM, optimized for modern JavaScript environments.
+Crypto primitives for ZeroLedger Protocol - ECDH encryption, stealth addresses, and post-quantum security.
 
-*Warning*: Software provided as is and has not passed any security checks and reviews.
+> ⚠️ **Warning**: Software provided as-is. Not audited for production use.
 
 ## Features
 
-- **Stealth Addresses**: Create and derive stealth addresses using secp256k1 public keys and random values
-- **ECDH Encryption**: Asymmetric encryption using ephemeral key pairs and AES-256-GCM
-- **Elliptic Curve Operations**: Secure multiplication of public and private keys on secp256k1 curve
-- **Type Safety**: Full TypeScript support with comprehensive type definitions
+- 🔐 **ECDH Encryption** - Ephemeral key pairs + AES-256-GCM
+- 🛡️ **Post-Quantum Encryption** - ML-KEM-768 (Kyber) resistant to quantum attacks
+- 👻 **Stealth Addresses** - Privacy-preserving address generation
+- 🔢 **Elliptic Operations** - secp256k1 key multiplication
+- 📦 **Pure ESM** - Modern JavaScript, TypeScript-native
 
-## Security Features
+## Requirements
 
-- **Forward Secrecy**: Uses ephemeral keys for each encryption operation
-- **Authenticated Encryption**: AES-256-GCM provides both confidentiality and integrity
-- **Key Validation**: Comprehensive validation of private and public keys
-- **Random IV**: Each encryption uses a cryptographically secure random IV
-- **ECDH Key Agreement**: Secure key derivation using secp256k1 curve
+- **Node.js** ≥ 20.19.0
+- **Pure ESM** - No CommonJS support
 
 ## Installation
 
@@ -27,287 +25,166 @@ Crypto primitives for ZeroLedger Protocol - A comprehensive cryptographic librar
 npm install @zeroledger/vycrypt
 ```
 
-## Module Format
+## Quick Start
 
-This library is **pure ESM** (ES Modules) and requires **Node.js 20.19.0 or later**.
-
-**Import the library:**
+### Classic Encryption
 
 ```typescript
 import { encrypt, decrypt } from "@zeroledger/vycrypt/crypt.js";
-import { createStealth, deriveStealthAccount } from "@zeroledger/vycrypt/stealth.js";
+import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
+
+const privKey = generatePrivateKey();
+const account = privateKeyToAccount(privKey);
+
+const encrypted = encrypt("Hello, World!", account.publicKey);
+const decrypted = decrypt(privKey, encrypted);
 ```
 
-### Build Output
+### Quantum-Resistant Encryption
 
-The library builds directly to the root directory with ESM format:
-- `*.js` - ES Module JavaScript files
-- `*.d.ts` - TypeScript declaration files
-- `stealth/` - Stealth address modules
+```typescript
+import { generateQuantumKeyPair, encryptQuantum, decryptQuantum } from "@zeroledger/vycrypt/qcrypt.js";
 
-All files include source maps (`.js.map`, `.d.ts.map`) for debugging.
+// Random key pair
+const keyPair = generateQuantumKeyPair();
 
-## API Reference
+// Or deterministic from seed
+const keys = generateQuantumKeyPair("my-passphrase");
 
-### Encryption & Decryption
-
-#### `encrypt(data: string, counterpartyPubKey: Hex): Hex`
-Encrypts data for a specific recipient using their public key.
-
-- **Parameters:**
-  - `data`: String to encrypt (supports any UTF-8 data)
-  - `counterpartyPubKey`: Recipient's uncompressed public key (0x-prefixed hex)
-- **Returns:** Encrypted data as hex string with ABI encoding
-- **Security:** Uses ephemeral ECDH + AES-256-GCM
-
-#### `decrypt(privateKey: Hash, encodedData: Hex): string`
-Decrypts data using your private key.
-
-- **Parameters:**
-  - `privateKey`: Your private key (0x-prefixed hex)
-  - `encodedData`: Encrypted data from `encrypt()`
-- **Returns:** Original decrypted string
-- **Throws:** Error if decryption fails or keys are invalid
+const encrypted = encryptQuantum("Secret data", keyPair.publicKey);
+const decrypted = decryptQuantum(keyPair.secretKey, encrypted);
+```
 
 ### Stealth Addresses
 
-#### `createStealth(publicKey: Hex): { stealthAddress: string, random: bigint }`
-Creates a stealth address from a public key.
-
-- **Parameters:**
-  - `publicKey`: Uncompressed public key (0x-prefixed hex)
-- **Returns:** Object containing stealth address and random value
-- **Security:** Uses cryptographically secure random values
-
-#### `deriveStealthAccount(privateKey: Hex, random: Hex): Account`
-Derives the private key for a stealth address.
-
-- **Parameters:**
-  - `privateKey`: Your private key (0x-prefixed hex)
-  - `random`: Random value from `createStealth()`
-- **Returns:** Viem account object with address matching stealth address
-
-### Elliptic Curve Operations
-
-#### `mulPublicKey(publicKey: Hex, number: bigint, isCompressed?: boolean): Hex`
-Multiplies a public key by a scalar value.
-
-- **Parameters:**
-  - `publicKey`: Uncompressed public key (0x-prefixed hex)
-  - `number`: Scalar to multiply by
-  - `isCompressed`: Whether to return compressed format (default: false)
-- **Returns:** New public key (0x-prefixed hex)
-
-#### `mulPrivateKey(privateKey: Hex, number: bigint): Hex`
-Multiplies a private key by a scalar value.
-
-- **Parameters:**
-  - `privateKey`: Private key (0x-prefixed hex)
-  - `number`: Scalar to multiply by
-- **Returns:** New private key (0x-prefixed hex)
-- **Security:** Automatically applies modulo operation to stay within curve order
-
-## Usage Examples
-
-### Basic Encryption/Decryption
-
 ```typescript
-import { encrypt, decrypt } from "@zeroledger/vycrypt/crypt.js";
-import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
-
-// Generate key pair
-const privKey = generatePrivateKey();
-const account = privateKeyToAccount(privKey);
-
-// Encrypt data
-const data = "Hello, World!";
-const encryptedData = encrypt(data, account.publicKey);
-
-// Decrypt data
-const decryptedData = decrypt(privKey, encryptedData);
-console.log(decryptedData); // "Hello, World!"
-```
-
-### Stealth Address Creation
-
-```typescript
-import { createStealth, deriveStealthAccount } from "@zeroledger/vycrypt/stealth.js";
+import { createStealth, deriveStealthAccount } from "@zeroledger/vycrypt/stealth/index.js";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 import { toHex } from "viem";
 
-// Generate key pair
 const privateKey = generatePrivateKey();
 const pubKey = privateKeyToAccount(privateKey).publicKey;
 
-// Create stealth address
 const { stealthAddress, random } = createStealth(pubKey);
-console.log("Stealth Address:", stealthAddress);
-
-// Derive private key for stealth address
 const account = deriveStealthAccount(privateKey, toHex(random));
-console.log("Derived Address:", account.address); // Same as stealthAddress
 ```
 
-### Elliptic Curve Operations
+## API Reference
 
-```typescript
-import { mulPublicKey, mulPrivateKey } from "@zeroledger/vycrypt/stealth.js";
-import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
+### Classic Encryption (`/crypt.js`)
 
-const privateKey = generatePrivateKey();
-const pubKey = privateKeyToAccount(privateKey).publicKey;
-const multiplier = 123n;
+#### `encrypt(data: string, publicKey: Hex): Hex`
+ECDH encryption with ephemeral keys and AES-256-GCM.
 
-// Multiply public key
-const newPublicKey = mulPublicKey(pubKey, multiplier);
+#### `decrypt(privateKey: Hash, encodedData: Hex): string`
+Decrypt data encrypted with `encrypt()`.
 
-// Multiply private key
-const newPrivateKey = mulPrivateKey(privateKey, multiplier);
+### Quantum Encryption (`/qcrypt.js`)
 
-// Verify they correspond
-const newAccount = privateKeyToAccount(newPrivateKey);
-console.log(newAccount.publicKey === newPublicKey); // true
-```
+#### `generateQuantumKeyPair(seed?: string): QuantumKeyPair`
+Generate ML-KEM-768 key pair. Optional seed for deterministic generation.
+- **Returns:** `{ publicKey: Hex, secretKey: Hex }`
+- **Key sizes:** 1184 bytes (public), 2400 bytes (secret)
 
-### Advanced: Encrypting Large Data
+#### `encryptQuantum(data: string, publicKey: Hex): Hex`
+Quantum-resistant encryption using ML-KEM-768 + AES-256-GCM.
 
-```typescript
-import { encrypt, decrypt } from "@zeroledger/vycrypt/crypt.js";
-import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
+#### `decryptQuantum(secretKey: Hex, encodedData: Hex): string`
+Decrypt quantum-encrypted data.
 
-const privKey = generatePrivateKey();
-const account = privateKeyToAccount(privKey);
+### Stealth Addresses (`/stealth/index.js`)
 
-// Encrypt large JSON data
-const largeData = JSON.stringify({
-  transaction: {
-    hash: "0x1234567890abcdef...",
-    value: "1000000000000000000",
-    // ... more data
-  }
-});
+#### `createStealth(publicKey: Hex): { stealthAddress: string, random: bigint }`
+Generate a stealth address with cryptographically secure random.
 
-const encrypted = encrypt(largeData, account.publicKey);
-const decrypted = decrypt(privKey, encrypted);
-console.log(JSON.parse(decrypted)); // Original object
-```
+#### `deriveStealthAccount(privateKey: Hex, random: Hex): Account`
+Derive private key for stealth address. Returns viem Account.
 
-## Security Considerations
+#### `mulPublicKey(publicKey: Hex, scalar: bigint, isCompressed?: boolean): Hex`
+Multiply public key by scalar on secp256k1 curve.
 
-### Key Management
-- **Never share private keys**: Keep private keys secure and never transmit them
-- **Use secure random generation**: Always use cryptographically secure random number generators
-- **Validate inputs**: The library validates keys, but ensure your application validates all inputs
+#### `mulPrivateKey(privateKey: Hex, scalar: bigint): Hex`
+Multiply private key by scalar (modulo curve order).
 
-### Encryption Best Practices
-- **Ephemeral keys**: Each encryption uses a new ephemeral key pair for forward secrecy
-- **Random IVs**: Each encryption uses a cryptographically secure random IV
-- **Authenticated encryption**: AES-GCM provides both confidentiality and integrity
+## Security
 
-### Stealth Address Security
-- **Random values**: Each stealth address uses a cryptographically secure random value
-- **Deterministic derivation**: Same inputs always produce the same stealth address
-- **No correlation**: Different random values produce uncorrelated stealth addresses
+### Classic Encryption
+- ✅ Forward secrecy (ephemeral keys)
+- ✅ Authenticated encryption (AES-256-GCM)
+- ✅ Random IVs per operation
+- ✅ ECDH on secp256k1 curve
 
-## Error Handling
+### Quantum Encryption
+- ✅ ML-KEM-768 (NIST FIPS 203)
+- ✅ Post-quantum secure
+- ✅ Hybrid encryption (KEM + AES-GCM)
+- ✅ Non-deterministic by default
 
-The library throws descriptive errors for invalid inputs:
+### Best Practices
+- Never share or transmit private keys
+- Use cryptographically secure random generation
+- Validate all inputs in your application
+- Consider quantum resistance for long-term secrets
 
-```typescript
-try {
-  const encrypted = encrypt("data", "0xinvalid");
-} catch (error) {
-  console.log(error.message); // "Must provide uncompressed public key as hex string"
-}
+## Module Exports
 
-try {
-  const decrypted = decrypt("0xinvalid", encryptedData);
-} catch (error) {
-  console.log(error.message); // "Must provide private key as hash string"
+```json
+{
+  ".": "./index.js",                    // Main exports
+  "./crypt.js": "./crypt.js",           // Classic encryption
+  "./qcrypt.js": "./qcrypt.js",         // Quantum encryption
+  "./stealth/index.js": "./stealth/index.js"  // Stealth addresses
 }
 ```
 
 ## Testing
 
-The library includes comprehensive tests covering:
-
-- **Encryption/Decryption**: Round-trip operations with various data types
-- **Error handling**: Invalid inputs and malformed data
-- **Edge cases**: Empty strings, large data, unicode, binary data
-- **Security properties**: Non-deterministic encryption, different outputs for different keys
-- **Stealth addresses**: Address generation, derivation, and validation
-- **Elliptic operations**: Key multiplication and validation
-
-Run tests with:
 ```bash
+# Run all tests
 npm test
-```
 
-Validate build output and ESM imports:
-```bash
+# Validate build and ESM imports
 npm run test:build
+
+# Type checking
+npm run typecheck
+
+# Linting
+npm run lint
 ```
 
-This command:
-1. Builds the library
-2. Validates all expected files are created
-3. Verifies built modules can be imported as ESM
-4. Confirms the API works as documented
+**Test coverage:** 89+ tests covering encryption, stealth addresses, edge cases, and build validation.
 
 ## Dependencies
 
-- **@noble/ciphers** (v2.0.1): AES-256-GCM authenticated encryption
-- **viem** (v2.38.6): Ethereum-compatible utilities, types, and hashing (SHA-256)
+| Package | Version | Purpose |
+|---------|---------|---------|
+| `@noble/ciphers` | ^2.0.1 | AES-256-GCM encryption |
+| `@noble/post-quantum` | ^0.5.2 | ML-KEM-768 (Kyber) |
+| `viem` | ^2.38.6 | Ethereum utilities, secp256k1, hashing |
 
-**Note:** Viem internally uses and re-exports `@noble/curves` (secp256k1) and `@noble/hashes`, ensuring compatibility across the ecosystem.
+> **Note:** vycryp re-exports `@noble/curves` and `@noble/hashes` from Viem for compatibility.
 
-All dependencies are ESM-compatible and actively maintained.
-
-## Contributing
-
-Contributions are always welcome! Please:
-
-1. Fork the repository
-2. Create a feature branch
-3. Add tests for new functionality
-4. Ensure all tests pass
-5. Submit a pull request
-
-### Development Setup
-
-```bash
-git clone <repository>
-cd vycrypt
-npm install
-npm test
-```
-
-### Building
-
-To build the ESM output:
+## Build
 
 ```bash
 npm run build
 ```
 
-This creates:
-- `*.js` files in the root directory (ESM format)
-- `stealth/` directory with stealth modules
-- TypeScript declaration files (`.d.ts`) and source maps
+Outputs:
+- `index.js`, `crypt.js`, `qcrypt.js` - Main modules
+- `stealth/` - Stealth address modules
+- `*.d.ts` - TypeScript declarations
+- `*.js.map` - Source maps
 
-### Type Checking
+## Contributing
 
-```bash
-npm run typecheck
-```
+1. Fork the repository
+2. Create a feature branch
+3. Add tests for new functionality
+4. Ensure `npm test` and `npm run test:build` pass
+5. Submit a pull request
 
 ## License
 
 SEE LICENSE IN LICENSE
-
-## Support
-
-For issues and questions:
-- Open an issue on GitHub
-- Check existing issues for similar problems
-- Review the test files for usage examples
