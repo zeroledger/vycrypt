@@ -7,6 +7,9 @@ const config: Config = {
   transform: {
     "^.+\\.(t|j)s$": "@swc/jest",
   },
+  transformIgnorePatterns: [
+    "node_modules/(?!(@noble/post-quantum|@noble/hashes|@noble/curves|@noble/ciphers)/)",
+  ],
   collectCoverageFrom: ["<rootDir>/src/**/*.ts", "!<rootDir>/**/*.module.ts"],
   coveragePathIgnorePatterns: [
     "/node_modules/",

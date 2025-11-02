@@ -12,6 +12,7 @@ TypeScript Development Kit for ZeroLedger Protocol - A comprehensive cryptograph
 
 - **Stealth Addresses**: Create and derive stealth addresses using secp256k1 public keys and random values
 - **ECDH Encryption**: Asymmetric encryption using ephemeral key pairs and AES-256-GCM
+- **Quantum-Resistant Encryption**: Post-quantum encryption using ML-KEM-768 (Kyber) in a separate module
 - **Elliptic Curve Operations**: Secure multiplication of public and private keys on secp256k1 curve
 - **Type Safety**: Full TypeScript support with comprehensive type definitions
 
@@ -19,6 +20,7 @@ TypeScript Development Kit for ZeroLedger Protocol - A comprehensive cryptograph
 
 - **Forward Secrecy**: Uses ephemeral keys for each encryption operation
 - **Authenticated Encryption**: AES-256-GCM provides both confidentiality and integrity
+- **Quantum Resistance**: Optional ML-KEM-768 (Kyber) for post-quantum security
 - **Key Validation**: Comprehensive validation of private and public keys
 - **Random IV**: Each encryption uses a cryptographically secure random IV
 - **ECDH Key Agreement**: Secure key derivation using secp256k1 curve
@@ -41,9 +43,11 @@ The library automatically provides the appropriate format based on your import m
 ```typescript
 // ES Modules (recommended for modern projects)
 import { encrypt, decrypt } from "@zeroledger/vycrypt";
+import { encryptQuantum, decryptQuantum } from "@zeroledger/vycrypt";
 
 // CommonJS (for legacy Node.js or specific bundler requirements)
 const { encrypt, decrypt } = require("@zeroledger/vycrypt");
+const { encryptQuantum, decryptQuantum } = require("@zeroledger/vycrypt");
 ```
 
 ### Build Output
@@ -73,6 +77,38 @@ Decrypts data using your private key.
 - **Parameters:**
   - `privateKey`: Your private key (0x-prefixed hex)
   - `encodedData`: Encrypted data from `encrypt()`
+- **Returns:** Original decrypted string
+- **Throws:** Error if decryption fails or keys are invalid
+
+### Quantum-Resistant Encryption & Decryption
+
+#### `generateQuantumKeyPair(seed?: string): QuantumKeyPair`
+Generates a quantum-resistant key pair using ML-KEM-768.
+
+- **Parameters:**
+  - `seed`: Optional seed string for deterministic key generation (any string, including unicode)
+- **Returns:** Object with `publicKey` and `secretKey` (both Hex strings)
+  - `publicKey`: 0x-prefixed hex string (1184 bytes / 2368 hex chars)
+  - `secretKey`: 0x-prefixed hex string (2400 bytes / 4800 hex chars)
+- **Security:** 
+  - Without seed: Uses cryptographically secure random generation
+  - With seed: Derives deterministic 64-byte seed using SHA-512 hashing
+
+#### `encryptQuantum(data: string, publicKey: Hex): Hex`
+Encrypts data using quantum-resistant ML-KEM-768.
+
+- **Parameters:**
+  - `data`: String to encrypt (supports any UTF-8 data)
+  - `publicKey`: Recipient's ML-KEM-768 public key (0x-prefixed hex string, 1184 bytes)
+- **Returns:** Encrypted data as hex string
+- **Security:** Uses ML-KEM-768 key encapsulation + AES-256-GCM
+
+#### `decryptQuantum(secretKey: Hex, encodedData: Hex): string`
+Decrypts data encrypted with quantum-resistant encryption.
+
+- **Parameters:**
+  - `secretKey`: Your ML-KEM-768 secret key (0x-prefixed hex string, 2400 bytes)
+  - `encodedData`: Encrypted data from `encryptQuantum()`
 - **Returns:** Original decrypted string
 - **Throws:** Error if decryption fails or keys are invalid
 
@@ -116,7 +152,7 @@ Multiplies a private key by a scalar value.
 
 ## Usage Examples
 
-### Basic Encryption/Decryption
+### Basic Encryption/Decryption (Classic)
 
 ```typescript
 import { encrypt, decrypt } from "@zeroledger/vycrypt";
@@ -133,6 +169,26 @@ const encryptedData = encrypt(data, account.publicKey);
 // Decrypt data
 const decryptedData = decrypt(privKey, encryptedData);
 console.log(decryptedData); // "Hello, World!"
+```
+
+### Quantum-Resistant Encryption/Decryption
+
+```typescript
+import { encryptQuantum, decryptQuantum, generateQuantumKeyPair } from "@zeroledger/vycrypt";
+
+// Generate random quantum-resistant key pair
+const keyPair = generateQuantumKeyPair();
+
+// Or generate deterministic key pair from a seed string
+const deterministicKeyPair = generateQuantumKeyPair("my-secret-passphrase");
+
+// Encrypt data
+const data = "Secret message protected from quantum computers";
+const encryptedData = encryptQuantum(data, keyPair.publicKey);
+
+// Decrypt data
+const decryptedData = decryptQuantum(keyPair.secretKey, encryptedData);
+console.log(decryptedData); // "Secret message protected from quantum computers"
 ```
 
 ### Stealth Address Creation
@@ -216,6 +272,13 @@ console.log(JSON.parse(decrypted)); // Original object
 - **Deterministic derivation**: Same inputs always produce the same stealth address
 - **No correlation**: Different random values produce uncorrelated stealth addresses
 
+### Quantum-Resistant Encryption
+- **ML-KEM-768 (Kyber)**: NIST-standardized post-quantum key encapsulation mechanism (FIPS 203)
+- **Post-quantum security**: Protects against both classical and quantum computer attacks
+- **Separate module**: Keep quantum encryption isolated in `qcrypt.ts` for clarity
+- **Larger keys**: ML-KEM keys are ~1-2KB compared to ~33 bytes for secp256k1
+- **Hybrid approach**: Combines post-quantum KEM with classical AES-256-GCM
+
 ## Error Handling
 
 The library throws descriptive errors for invalid inputs:
@@ -238,7 +301,8 @@ try {
 
 The library includes comprehensive tests covering:
 
-- **Encryption/Decryption**: Round-trip operations with various data types
+- **Classic Encryption/Decryption**: Round-trip operations with various data types
+- **Quantum-Resistant Encryption**: ML-KEM-768 encryption and decryption
 - **Error handling**: Invalid inputs and malformed data
 - **Edge cases**: Empty strings, large data, unicode, binary data
 - **Security properties**: Non-deterministic encryption, different outputs for different keys
@@ -250,11 +314,21 @@ Run tests with:
 npm test
 ```
 
+Run specific test suites:
+```bash
+# Classic encryption tests
+npm test -- test/crypt.spec.ts
+
+# Quantum-resistant encryption tests
+npm test -- test/qcrypt.spec.ts
+```
+
 ## Dependencies
 
 - **@noble/curves**: For secp256k1 elliptic curve operations
 - **@noble/ciphers**: For AES-256-GCM encryption
-- **@noble/hashes**: For SHA-256 hashing
+- **@noble/hashes**: For SHA-256 and SHA-3 hashing
+- **@noble/post-quantum**: For ML-KEM-768 (Kyber) post-quantum encryption
 - **viem**: For Ethereum-compatible utilities and types
 
 ## Contributing
