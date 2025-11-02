@@ -1,4 +1,7 @@
-import { createStealth, deriveStealthAccount } from "../../src/stealth";
+import {
+  createStealth,
+  deriveStealthAccount,
+} from "../../src/stealth/stealth.ts";
 import { isAddress, toHex } from "viem";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 

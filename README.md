@@ -243,6 +243,17 @@ Run tests with:
 npm test
 ```
 
+Validate build output and ESM imports:
+```bash
+npm run test:build
+```
+
+This command:
+1. Builds the library
+2. Validates all expected files are created
+3. Verifies built modules can be imported as ESM
+4. Confirms the API works as documented
+
 ## Dependencies
 
 - **@noble/ciphers** (v2.0.1): AES-256-GCM authenticated encryption

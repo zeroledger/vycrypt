@@ -31,6 +31,7 @@
   },
   "scripts": {
     "test": "NODE_OPTIONS='--experimental-vm-modules --no-warnings' jest",
+    "test:build": "npm run build && npm test -- test/build-output.spec.ts && node test/integration/esm-imports.mjs",
     "lint": "eslint src/**/*.ts test/**/*.ts",
     "prepare": "husky",
     "typecheck": "tsc --noEmit",
