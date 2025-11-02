@@ -1,7 +1,7 @@
 {
   "name": "@zeroledger/vycrypt",
   "version": "1.0.0-betta",
-  "description": "TS Development Kit for ZeroLeger Protocol",
+  "description": "Crypto primitives for ZeroLedger Protocol",
   "files": [
     "*.js",
     "*.d.ts",
@@ -34,8 +34,8 @@
     "lint": "eslint src/**/*.ts test/**/*.ts",
     "prepare": "husky",
     "typecheck": "tsc --noEmit",
-    "build": "rm -rf *.js *.d.ts *.d.ts.map *.js.map stealth cjs esm && tsc",
-    "build:clean": "rm *.{js,js.map,d.ts,d.ts.map} 2> /dev/null",
+    "build": "tsc",
+    "build:clean": "rm *.{js,js.map,d.ts,d.ts.map} stealth 2> /dev/null",
     "prepublishOnly": "npm run build"
   },
   "exports": {

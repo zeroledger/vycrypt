@@ -2,9 +2,7 @@
 
 [![Quality gate](https://github.com/zeroledger/vycrypt/actions/workflows/quality-gate.yml/badge.svg)](https://github.com/zeroledger/vycrypt/actions/workflows/quality-gate.yml)
 
-
-
-TypeScript Development Kit for ZeroLedger Protocol - A comprehensive cryptographic library for stealth addresses and ECDH encryption. Pure ESM, optimized for modern JavaScript environments.
+Crypto primitives for ZeroLedger Protocol - A comprehensive cryptographic library for stealth addresses and ECDH encryption. Pure ESM, optimized for modern JavaScript environments.
 
 *Warning*: Software provided as is and has not passed any security checks and reviews.
 
@@ -36,8 +34,8 @@ This library is **pure ESM** (ES Modules) and requires **Node.js 20.19.0 or late
 **Import the library:**
 
 ```typescript
-import { encrypt, decrypt } from "@zeroledger/vycrypt";
-import { createStealth, deriveStealthAccount } from "@zeroledger/vycrypt";
+import { encrypt, decrypt } from "@zeroledger/vycrypt/crypt.js";
+import { createStealth, deriveStealthAccount } from "@zeroledger/vycrypt/stealth.js";
 ```
 
 ### Build Output
@@ -114,7 +112,7 @@ Multiplies a private key by a scalar value.
 ### Basic Encryption/Decryption
 
 ```typescript
-import { encrypt, decrypt } from "@zeroledger/vycrypt";
+import { encrypt, decrypt } from "@zeroledger/vycrypt/crypt.js";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 
 // Generate key pair
@@ -133,7 +131,7 @@ console.log(decryptedData); // "Hello, World!"
 ### Stealth Address Creation
 
 ```typescript
-import { createStealth, deriveStealthAccount } from "@zeroledger/vycrypt";
+import { createStealth, deriveStealthAccount } from "@zeroledger/vycrypt/stealth.js";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 import { toHex } from "viem";
 
@@ -153,7 +151,7 @@ console.log("Derived Address:", account.address); // Same as stealthAddress
 ### Elliptic Curve Operations
 
 ```typescript
-import { mulPublicKey, mulPrivateKey } from "@zeroledger/vycrypt";
+import { mulPublicKey, mulPrivateKey } from "@zeroledger/vycrypt/stealth.js";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 
 const privateKey = generatePrivateKey();
@@ -174,7 +172,7 @@ console.log(newAccount.publicKey === newPublicKey); // true
 ### Advanced: Encrypting Large Data
 
 ```typescript
-import { encrypt, decrypt } from "@zeroledger/vycrypt";
+import { encrypt, decrypt } from "@zeroledger/vycrypt/crypt.js";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 
 const privKey = generatePrivateKey();
@@ -247,10 +245,10 @@ npm test
 
 ## Dependencies
 
-- **@noble/curves** (v1.9.1): For secp256k1 elliptic curve operations
-- **@noble/ciphers** (v2.0.1): For AES-256-GCM encryption
-- **@noble/hashes**: For SHA-256 and SHA-512 hashing
-- **viem** (v2.38.6): For Ethereum-compatible utilities and types
+- **@noble/ciphers** (v2.0.1): AES-256-GCM authenticated encryption
+- **viem** (v2.38.6): Ethereum-compatible utilities, types, and hashing (SHA-256)
+
+**Note:** Viem internally uses and re-exports `@noble/curves` (secp256k1) and `@noble/hashes`, ensuring compatibility across the ecosystem.
 
 All dependencies are ESM-compatible and actively maintained.
 
