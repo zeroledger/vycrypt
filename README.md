@@ -74,7 +74,8 @@ const account = deriveStealthAccount(privateKey, toHex(random));
 ### Classic Encryption (`/crypt.js`)
 
 #### `encrypt(data: string, publicKey: Hex): Hex`
-ECDH encryption with ephemeral keys and AES-256-GCM.
+ECDH encryption with ephemeral keys and AES-256-GCM. **Max 254 bytes input.**
+- All ciphertexts are fixed-length (255 bytes padded) for perfect length obfuscation.
 
 #### `decrypt(privateKey: Hash, encodedData: Hex): string`
 Decrypt data encrypted with `encrypt()`.
@@ -87,7 +88,8 @@ Generate ML-KEM-768 key pair. Optional seed for deterministic generation.
 - **Key sizes:** 1184 bytes (public), 2400 bytes (secret)
 
 #### `encryptQuantum(data: string, publicKey: Hex): Hex`
-Quantum-resistant encryption using ML-KEM-768 + AES-256-GCM.
+Quantum-resistant encryption using ML-KEM-768 + AES-256-GCM. **Max 254 bytes input.**
+- All ciphertexts are fixed-length (255 bytes padded) for perfect length obfuscation.
 
 #### `decryptQuantum(secretKey: Hex, encodedData: Hex): string`
 Decrypt quantum-encrypted data.
@@ -113,12 +115,14 @@ Multiply private key by scalar (modulo curve order).
 - ✅ Authenticated encryption (AES-256-GCM)
 - ✅ Random IVs per operation
 - ✅ ECDH on secp256k1 curve
+- ✅ Fixed-length ciphertexts (length obfuscation)
 
 ### Quantum Encryption
 - ✅ ML-KEM-768 (NIST FIPS 203)
 - ✅ Post-quantum secure
 - ✅ Hybrid encryption (KEM + AES-GCM)
 - ✅ Non-deterministic by default
+- ✅ Fixed-length ciphertexts (length obfuscation)
 
 ### Best Practices
 - Never share or transmit private keys
@@ -153,7 +157,7 @@ npm run typecheck
 npm run lint
 ```
 
-**Test coverage:** 89+ tests covering encryption, stealth addresses, edge cases, and build validation.
+**Test coverage:** 128 tests covering encryption, stealth addresses, edge cases, and build validation.
 
 ## Dependencies
 

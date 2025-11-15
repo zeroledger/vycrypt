@@ -5,7 +5,6 @@ import {
   generateQuantumKeyPair,
   type QuantumKeyPair,
 } from "../src/qcrypt.ts";
-import * as fs from "fs";
 
 describe("quantum-resistant encryption", () => {
   let keyPair: QuantumKeyPair;
@@ -15,7 +14,6 @@ describe("quantum-resistant encryption", () => {
   });
 
   const hexData = `0xa5eaba8f6b292d059d9e8c3a2f1b16af`;
-  const jsonData = fs.readFileSync("./test/mocks/arbitraryData.json", "utf8");
 
   describe("generateQuantumKeyPair", () => {
     it("should generate a valid key pair", () => {
@@ -78,9 +76,15 @@ describe("quantum-resistant encryption", () => {
       expect(isHex(encrypted)).toBeTruthy();
     });
 
-    it("should encrypt json string", () => {
-      const encrypted = encryptQuantum(jsonData, keyPair.publicKey);
+    it("should encrypt json string (small)", () => {
+      const smallJson = JSON.stringify({
+        name: "Alice",
+        age: 30,
+        active: true,
+      });
+      const encrypted = encryptQuantum(smallJson, keyPair.publicKey);
       expect(isHex(encrypted)).toBeTruthy();
+      expect(decryptQuantum(keyPair.secretKey, encrypted)).toBe(smallJson);
     });
 
     it("should encrypt empty string", () => {
@@ -89,11 +93,18 @@ describe("quantum-resistant encryption", () => {
       expect(decryptQuantum(keyPair.secretKey, encrypted)).toBe("");
     });
 
-    it("should encrypt large data", () => {
-      const largeData = "x".repeat(10000);
-      const encrypted = encryptQuantum(largeData, keyPair.publicKey);
+    it("should encrypt maximum allowed data (254 bytes)", () => {
+      const maxData = "x".repeat(254);
+      const encrypted = encryptQuantum(maxData, keyPair.publicKey);
       expect(isHex(encrypted)).toBeTruthy();
-      expect(decryptQuantum(keyPair.secretKey, encrypted)).toBe(largeData);
+      expect(decryptQuantum(keyPair.secretKey, encrypted)).toBe(maxData);
+    });
+
+    it("should throw error for data >= 255 bytes", () => {
+      const tooLarge = "x".repeat(255);
+      expect(() => encryptQuantum(tooLarge, keyPair.publicKey)).toThrow(
+        "Data length must be less than 255",
+      );
     });
 
     it("should encrypt unicode data", () => {
@@ -139,10 +150,15 @@ describe("quantum-resistant encryption", () => {
       expect(decrypted).toBe(hexData);
     });
 
-    it("should decrypt json string", () => {
-      const encrypted = encryptQuantum(jsonData, keyPair.publicKey);
+    it("should decrypt json string (small)", () => {
+      const smallJson = JSON.stringify({
+        name: "Bob",
+        id: 123,
+        verified: false,
+      });
+      const encrypted = encryptQuantum(smallJson, keyPair.publicKey);
       const decrypted = decryptQuantum(keyPair.secretKey, encrypted);
-      expect(decrypted).toBe(jsonData);
+      expect(decrypted).toBe(smallJson);
     });
 
     it("should decrypt empty string", () => {
@@ -151,11 +167,11 @@ describe("quantum-resistant encryption", () => {
       expect(decrypted).toBe("");
     });
 
-    it("should decrypt large data", () => {
-      const largeData = "x".repeat(10000);
-      const encrypted = encryptQuantum(largeData, keyPair.publicKey);
+    it("should decrypt maximum allowed data (254 bytes)", () => {
+      const maxData = "x".repeat(254);
+      const encrypted = encryptQuantum(maxData, keyPair.publicKey);
       const decrypted = decryptQuantum(keyPair.secretKey, encrypted);
-      expect(decrypted).toBe(largeData);
+      expect(decrypted).toBe(maxData);
     });
 
     it("should decrypt unicode data", () => {
@@ -219,11 +235,18 @@ describe("quantum-resistant encryption", () => {
   });
 
   describe("edge cases", () => {
-    it("should handle very long strings", () => {
-      const longString = "a".repeat(100000);
-      const encrypted = encryptQuantum(longString, keyPair.publicKey);
+    it("should handle maximum size strings (254 bytes)", () => {
+      const maxString = "a".repeat(254);
+      const encrypted = encryptQuantum(maxString, keyPair.publicKey);
       const decrypted = decryptQuantum(keyPair.secretKey, encrypted);
-      expect(decrypted).toBe(longString);
+      expect(decrypted).toBe(maxString);
+    });
+
+    it("should throw for strings over 254 bytes", () => {
+      const tooLong = "a".repeat(255);
+      expect(() => encryptQuantum(tooLong, keyPair.publicKey)).toThrow(
+        "Data length must be less than 255",
+      );
     });
 
     it("should handle null bytes in data", () => {
@@ -278,6 +301,89 @@ describe("quantum-resistant encryption", () => {
       // Quantum encryption has overhead: 12 (IV) + 1088 (KEM) + 16 (GCM tag) = 1116 bytes
       // In hex: 1116 * 2 + 2 ("0x") = 2234 chars minimum
       expect(encrypted.length).toBeGreaterThan(2200);
+    });
+  });
+
+  describe("length obfuscation", () => {
+    it("should produce same length for all plaintexts (fixed 255 bytes)", () => {
+      const data1 = "short";
+      const data2 = "x".repeat(254);
+      const data3 = "";
+
+      const encrypted1 = encryptQuantum(data1, keyPair.publicKey);
+      const encrypted2 = encryptQuantum(data2, keyPair.publicKey);
+      const encrypted3 = encryptQuantum(data3, keyPair.publicKey);
+
+      // All should be same length (255 bytes padded + overhead)
+      expect(encrypted1.length).toBe(encrypted2.length);
+      expect(encrypted2.length).toBe(encrypted3.length);
+    });
+
+    it("should pad to exactly 255 bytes before encryption", () => {
+      // All encrypted data should be same length regardless of input
+      const data1 = "test";
+      const data2 = "";
+      const data3 = "x".repeat(100);
+
+      const encrypted1 = encryptQuantum(data1, keyPair.publicKey);
+      const encrypted2 = encryptQuantum(data2, keyPair.publicKey);
+      const encrypted3 = encryptQuantum(data3, keyPair.publicKey);
+
+      // All should be exactly the same length
+      expect(encrypted1.length).toBe(encrypted2.length);
+      expect(encrypted2.length).toBe(encrypted3.length);
+    });
+
+    it("should correctly decrypt data with different sizes", () => {
+      const testData = [
+        "",
+        "a",
+        "test data",
+        "x".repeat(50),
+        "x".repeat(100),
+        "x".repeat(254),
+      ];
+
+      for (const data of testData) {
+        const encrypted = encryptQuantum(data, keyPair.publicKey);
+        const decrypted = decryptQuantum(keyPair.secretKey, encrypted);
+        expect(decrypted).toBe(data);
+      }
+    });
+
+    it("should handle maximum padding (254 bytes for empty string)", () => {
+      const data = "";
+      const encrypted = encryptQuantum(data, keyPair.publicKey);
+      const decrypted = decryptQuantum(keyPair.secretKey, encrypted);
+      expect(decrypted).toBe(data);
+
+      // Should be same length as any other encryption
+      const other = encryptQuantum("test", keyPair.publicKey);
+      expect(encrypted.length).toBe(other.length);
+    });
+
+    it("should handle minimum padding (1 byte for 254-byte string)", () => {
+      const data = "x".repeat(254);
+      const encrypted = encryptQuantum(data, keyPair.publicKey);
+      const decrypted = decryptQuantum(keyPair.secretKey, encrypted);
+      expect(decrypted).toBe(data);
+
+      // Should be same length as any other encryption
+      const other = encryptQuantum("test", keyPair.publicKey);
+      expect(encrypted.length).toBe(other.length);
+    });
+
+    it("should throw error for corrupted data", () => {
+      const data = "test data";
+      const encrypted = encryptQuantum(data, keyPair.publicKey);
+
+      // Corrupt the encrypted data
+      const corruptedData = encrypted.slice(0, -10) + "ff".repeat(5);
+
+      // Should fail at AES decryption
+      expect(() =>
+        decryptQuantum(keyPair.secretKey, corruptedData as `0x${string}`),
+      ).toThrow();
     });
   });
 });

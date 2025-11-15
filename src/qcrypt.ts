@@ -67,13 +67,28 @@ export function generateQuantumKeyPair(seed?: string): QuantumKeyPair {
 }
 
 /**
- * @notice Encrypt data using quantum-resistant ML-KEM-768
+ * @notice Encrypt data using quantum-resistant ML-KEM-768 with length obfuscation
  * @param data String to encrypt (supports any UTF-8 data)
  * @param publicKey Recipient's ML-KEM-768 public key (0x-prefixed hex string, 1184 bytes)
  * @returns Hex string of encrypted data
+ * @description Adds a 1-byte header + paddingSize (1-254 bytes) before the actual data to obfuscate length
  */
 export const encryptQuantum = (data: string, publicKey: Hex): Hex => {
   assertValidQuantumPublicKey(publicKey);
+
+  const dataBytes = encoder.encode(data);
+
+  if (dataBytes.length >= 255) {
+    throw new Error("Data length must be less than 255");
+  }
+
+  const fakePrefixSize = 255 - dataBytes.length;
+  const fakePrefix = randomBytes(fakePrefixSize);
+  // Create padded data: [prefix_size(1 byte)][fake_prefix(1-254 bytes)][actual_data]
+  const paddedData = new Uint8Array(1 + fakePrefixSize + dataBytes.length);
+  paddedData[0] = fakePrefixSize;
+  paddedData.set(fakePrefix, 1);
+  paddedData.set(dataBytes, 1 + fakePrefixSize);
 
   // Convert public key from hex to bytes
   const publicKeyBytes = toBytes(publicKey);
@@ -87,9 +102,8 @@ export const encryptQuantum = (data: string, publicKey: Hex): Hex => {
 
   // Encrypt data with AES-256-GCM
   const iv = randomBytes(12);
-  const rawData = encoder.encode(data);
   const aes = gcm(aesKey, iv);
-  const ciphertext = aes.encrypt(rawData);
+  const ciphertext = aes.encrypt(paddedData);
 
   // Format: iv(12) + kemCiphertext(1088) + ciphertext(variable)
   return `${toHex(iv)}${toHex(kemCiphertext).slice(2)}${toHex(ciphertext).slice(2)}` as Hex;
@@ -100,6 +114,7 @@ export const encryptQuantum = (data: string, publicKey: Hex): Hex => {
  * @param secretKey Your ML-KEM-768 secret key (0x-prefixed hex string, 2400 bytes)
  * @param encodedData Encrypted data from encryptQuantum()
  * @returns Decrypted string
+ * @description Automatically removes fake prefix padding added during encryption
  */
 export const decryptQuantum = (secretKey: Hex, encodedData: Hex): string => {
   assertValidQuantumSecretKey(secretKey);
@@ -120,6 +135,13 @@ export const decryptQuantum = (secretKey: Hex, encodedData: Hex): string => {
 
   // Decrypt with AES-256-GCM
   const aes = gcm(aesKey, iv);
+  const decryptedBytes = aes.decrypt(ciphertext);
 
-  return decoder.decode(aes.decrypt(ciphertext));
+  // Read the fake prefix size from first byte
+  const fakePrefixSize = decryptedBytes[0];
+
+  // Skip header (1 byte) and fake prefix, return actual data
+  const actualData = decryptedBytes.slice(1 + fakePrefixSize);
+
+  return decoder.decode(actualData);
 };

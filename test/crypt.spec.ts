@@ -1,22 +1,27 @@
 import { isHex } from "viem";
 import { privateKeyToAccount, generatePrivateKey } from "viem/accounts";
 import { encrypt, decrypt } from "../src/crypt.ts";
-import * as fs from "fs";
 
 describe("crypt", () => {
   const privKey = generatePrivateKey();
   const account = privateKeyToAccount(privKey);
 
   const hexData = `0xa5eaba8f6b292d059d9e8c3a2f1b16af`;
-  const jsonData = fs.readFileSync("./test/mocks/arbitraryData.json", "utf8");
 
   describe("encrypt", () => {
     it("should encrypt hex string", () => {
       expect(isHex(encrypt(hexData, account.publicKey))).toBeTruthy();
     });
 
-    it("should encrypt json string", () => {
-      expect(isHex(encrypt(jsonData, account.publicKey))).toBeTruthy();
+    it("should encrypt json string (small)", () => {
+      const smallJson = JSON.stringify({
+        name: "Alice",
+        age: 30,
+        active: true,
+      });
+      const encrypted = encrypt(smallJson, account.publicKey);
+      expect(isHex(encrypted)).toBeTruthy();
+      expect(decrypt(privKey, encrypted)).toBe(smallJson);
     });
 
     it("should encrypt empty string", () => {
@@ -25,11 +30,18 @@ describe("crypt", () => {
       expect(decrypt(privKey, encrypted)).toBe("");
     });
 
-    it("should encrypt large data", () => {
-      const largeData = "x".repeat(10000);
-      const encrypted = encrypt(largeData, account.publicKey);
+    it("should encrypt maximum allowed data (254 bytes)", () => {
+      const maxData = "x".repeat(254);
+      const encrypted = encrypt(maxData, account.publicKey);
       expect(isHex(encrypted)).toBeTruthy();
-      expect(decrypt(privKey, encrypted)).toBe(largeData);
+      expect(decrypt(privKey, encrypted)).toBe(maxData);
+    });
+
+    it("should throw error for data >= 255 bytes", () => {
+      const tooLarge = "x".repeat(255);
+      expect(() => encrypt(tooLarge, account.publicKey)).toThrow(
+        "Data length must be less than 255",
+      );
     });
 
     it("should encrypt unicode data", () => {
@@ -70,9 +82,14 @@ describe("crypt", () => {
       expect(decrypt(privKey, encryptedData)).toBe(hexData);
     });
 
-    it("should decrypt json string", () => {
-      const encryptedData = encrypt(jsonData, account.publicKey);
-      expect(decrypt(privKey, encryptedData)).toBe(jsonData);
+    it("should decrypt json string (small)", () => {
+      const smallJson = JSON.stringify({
+        name: "Bob",
+        id: 123,
+        verified: false,
+      });
+      const encryptedData = encrypt(smallJson, account.publicKey);
+      expect(decrypt(privKey, encryptedData)).toBe(smallJson);
     });
 
     it("should decrypt empty string", () => {
@@ -80,10 +97,10 @@ describe("crypt", () => {
       expect(decrypt(privKey, encryptedData)).toBe("");
     });
 
-    it("should decrypt large data", () => {
-      const largeData = "x".repeat(10000);
-      const encryptedData = encrypt(largeData, account.publicKey);
-      expect(decrypt(privKey, encryptedData)).toBe(largeData);
+    it("should decrypt maximum allowed data (254 bytes)", () => {
+      const maxData = "x".repeat(254);
+      const encryptedData = encrypt(maxData, account.publicKey);
+      expect(decrypt(privKey, encryptedData)).toBe(maxData);
     });
 
     it("should decrypt unicode data", () => {
@@ -147,10 +164,17 @@ describe("crypt", () => {
   });
 
   describe("edge cases", () => {
-    it("should handle very long strings", () => {
-      const longString = "a".repeat(100000);
-      const encrypted = encrypt(longString, account.publicKey);
-      expect(decrypt(privKey, encrypted)).toBe(longString);
+    it("should handle maximum size strings (254 bytes)", () => {
+      const maxString = "a".repeat(254);
+      const encrypted = encrypt(maxString, account.publicKey);
+      expect(decrypt(privKey, encrypted)).toBe(maxString);
+    });
+
+    it("should throw for strings over 254 bytes", () => {
+      const tooLong = "a".repeat(255);
+      expect(() => encrypt(tooLong, account.publicKey)).toThrow(
+        "Data length must be less than 255",
+      );
     });
 
     it("should handle null bytes in data", () => {
@@ -195,6 +219,87 @@ describe("crypt", () => {
       const encrypted2 = encrypt(data, account2.publicKey);
 
       expect(encrypted1).not.toBe(encrypted2);
+    });
+  });
+
+  describe("length obfuscation", () => {
+    it("should produce same length for all plaintexts (fixed 255 bytes)", () => {
+      const data1 = "short";
+      const data2 = "x".repeat(254);
+      const data3 = "";
+
+      const encrypted1 = encrypt(data1, account.publicKey);
+      const encrypted2 = encrypt(data2, account.publicKey);
+      const encrypted3 = encrypt(data3, account.publicKey);
+
+      // All should be same length (255 bytes padded + overhead)
+      expect(encrypted1.length).toBe(encrypted2.length);
+      expect(encrypted2.length).toBe(encrypted3.length);
+    });
+
+    it("should pad to exactly 255 bytes before encryption", () => {
+      // All encrypted data should be same length regardless of input
+      const data1 = "test";
+      const data2 = "";
+      const data3 = "x".repeat(100);
+
+      const encrypted1 = encrypt(data1, account.publicKey);
+      const encrypted2 = encrypt(data2, account.publicKey);
+      const encrypted3 = encrypt(data3, account.publicKey);
+
+      // All should be exactly the same length
+      expect(encrypted1.length).toBe(encrypted2.length);
+      expect(encrypted2.length).toBe(encrypted3.length);
+    });
+
+    it("should correctly decrypt data with different sizes", () => {
+      const testData = [
+        "",
+        "a",
+        "test data",
+        "x".repeat(50),
+        "x".repeat(100),
+        "x".repeat(254),
+      ];
+
+      for (const data of testData) {
+        const encrypted = encrypt(data, account.publicKey);
+        const decrypted = decrypt(privKey, encrypted);
+        expect(decrypted).toBe(data);
+      }
+    });
+
+    it("should handle maximum padding (254 bytes for empty string)", () => {
+      const data = "";
+      const encrypted = encrypt(data, account.publicKey);
+      const decrypted = decrypt(privKey, encrypted);
+      expect(decrypted).toBe(data);
+
+      // Should be same length as any other encryption
+      const other = encrypt("test", account.publicKey);
+      expect(encrypted.length).toBe(other.length);
+    });
+
+    it("should handle minimum padding (1 byte for 254-byte string)", () => {
+      const data = "x".repeat(254);
+      const encrypted = encrypt(data, account.publicKey);
+      const decrypted = decrypt(privKey, encrypted);
+      expect(decrypted).toBe(data);
+
+      // Should be same length as any other encryption
+      const other = encrypt("test", account.publicKey);
+      expect(encrypted.length).toBe(other.length);
+    });
+
+    it("should throw error for corrupted data", () => {
+      const data = "test data";
+      const encrypted = encrypt(data, account.publicKey);
+
+      // Corrupt the encrypted data
+      const corruptedData = encrypted.slice(0, -10) + "ff".repeat(5);
+
+      // Should fail at AES decryption
+      expect(() => decrypt(privKey, corruptedData as `0x${string}`)).toThrow();
     });
   });
 });
