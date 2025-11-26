@@ -73,16 +73,20 @@ export function generateQuantumKeyPair(seed?: string): QuantumKeyPair {
  * @returns Hex string of encrypted data
  * @description Adds a 1-byte header + paddingSize (1-254 bytes) before the actual data to obfuscate length
  */
-export const encryptQuantum = (data: string, publicKey: Hex): Hex => {
+export const encryptQuantum = (
+  data: string,
+  publicKey: Hex,
+  { obfuscateLength }: { obfuscateLength: boolean } = { obfuscateLength: true },
+): Hex => {
   assertValidQuantumPublicKey(publicKey);
 
   const dataBytes = encoder.encode(data);
 
-  if (dataBytes.length >= 255) {
+  if (obfuscateLength && dataBytes.length >= 255) {
     throw new Error("Data length must be less than 255");
   }
 
-  const fakePrefixSize = 255 - dataBytes.length;
+  const fakePrefixSize = obfuscateLength ? 255 - dataBytes.length : 0;
   const fakePrefix = randomBytes(fakePrefixSize);
   // Create padded data: [prefix_size(1 byte)][fake_prefix(1-254 bytes)][actual_data]
   const paddedData = new Uint8Array(1 + fakePrefixSize + dataBytes.length);

@@ -170,11 +170,24 @@ describe("crypt", () => {
       expect(decrypt(privKey, encrypted)).toBe(maxString);
     });
 
-    it("should throw for strings over 254 bytes", () => {
+    it("should throw for strings over 254 bytes when obfuscateLength is true", () => {
       const tooLong = "a".repeat(255);
       expect(() => encrypt(tooLong, account.publicKey)).toThrow(
         "Data length must be less than 255",
       );
+    });
+
+    it("should not throw for strings over 254 bytes when obfuscateLength is false", () => {
+      const tooLong = "a".repeat(255);
+      expect(() =>
+        encrypt(tooLong, account.publicKey, { obfuscateLength: false }),
+      ).not.toThrow();
+      expect(
+        decrypt(
+          privKey,
+          encrypt(tooLong, account.publicKey, { obfuscateLength: false }),
+        ),
+      ).toBe(tooLong);
     });
 
     it("should handle null bytes in data", () => {
