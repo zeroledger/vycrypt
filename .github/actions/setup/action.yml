@@ -4,12 +4,11 @@ description: Install and cache npm and node_modules to reuse them in workflows a
 runs:
   using: composite
   steps:
-    - uses: actions/setup-node@v4
+    - uses: actions/setup-node@v6
       with:
         cache: "npm"
         node-version: 20.19.x
         registry-url: "https://registry.npmjs.org"
         scope: '@zeroledger'
-        always-auth: 'true'
     - run: npm ci
       shell: bash
