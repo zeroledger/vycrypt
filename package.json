@@ -61,8 +61,7 @@
   },
   "homepage": "https://github.com/zeroledger/vyrcypt#readme",
   "repository": {
-    "type": "git",
-    "url": "git+https://github.com/zeroledger/vyrcypt.git"
+    "url": "https://github.com/zeroledger/vycrypt"
   },
   "bugs": {
     "url": "https://github.com/zeroledger/vyrcypt/issues"

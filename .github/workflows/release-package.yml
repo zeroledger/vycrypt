@@ -4,8 +4,8 @@ on:
     types: [published]
 
 permissions:
+  id-token: write # Required for OIDC
   contents: read
-  packages: write
 
 jobs:
   publish-pkg:
@@ -13,7 +13,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: ./.github/actions/setup
+      - name: Update npm
+        run: npm install -g npm@latest
       - run: npm run build
-      - run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_DEPLOY_TOKEN }}
+      - run: NODE_AUTH_TOKEN="" npm publish --tag latest
