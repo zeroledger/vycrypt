@@ -1,6 +1,6 @@
 {
   "name": "@zeroledger/vycrypt",
-  "version": "1.0.0-betta-1",
+  "version": "1.0.0-beta-2",
   "description": "Crypto primitives for ZeroLedger Protocol",
   "files": [
     "*.js",
@@ -26,8 +26,10 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@noble/ciphers": "^2.0.1",
-    "@noble/post-quantum": "^0.5.2",
+    "@noble/ciphers": "^2.1.1",
+    "@noble/curves": "^1.9.1",
+    "@noble/hashes": "^1.8.0",
+    "@noble/post-quantum": "^0.6.0",
     "viem": "^2.38.6"
   },
   "scripts": {
@@ -47,7 +49,7 @@
     "./stealth/index.js": "./stealth/index.js"
   },
   "engines": {
-    "node": ">= 20.19.0"
+    "node": ">= 22.x.x"
   },
   "keywords": [
     "vycrypt",

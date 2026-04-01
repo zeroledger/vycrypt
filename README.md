@@ -16,7 +16,7 @@ Crypto primitives for ZeroLedger Protocol - ECDH encryption, stealth addresses, 
 
 ## Requirements
 
-- **Node.js** ≥ 20.19.0
+- **Node.js** ≥ 22.x.x
 - **Pure ESM** - No CommonJS support
 
 ## Installation
