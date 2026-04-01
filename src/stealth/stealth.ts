@@ -1,5 +1,5 @@
-import * as utils from "@noble/curves/abstract/utils";
-import { randomBytes } from "@noble/hashes/utils";
+import * as utils from "@noble/curves/abstract/utils.js";
+import { randomBytes } from "@noble/hashes/utils.js";
 import { type Hex, hexToBigInt, keccak256, isAddress, getAddress } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { mulPublicKey, mulPrivateKey } from "./elliptic.ts";

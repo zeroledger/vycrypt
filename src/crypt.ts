@@ -1,5 +1,5 @@
-import { secp256k1 } from "@noble/curves/secp256k1";
-import { randomBytes } from "@noble/hashes/utils";
+import { secp256k1 } from "@noble/curves/secp256k1.js";
+import { randomBytes } from "@noble/hashes/utils.js";
 import { gcm } from "@noble/ciphers/aes.js";
 
 import {
